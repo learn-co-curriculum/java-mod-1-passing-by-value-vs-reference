@@ -95,12 +95,12 @@ What do you think the new output for the program is with this new version of the
 It now outputs `0` as a the result of the sum, and here is why:
 
 - `addNumbers()` receives a copy of the `myObject` reference, as it did in the
-  original version
+  original version.
 - But now the first thing it does is take that reference, called `container` and
-  use the assignment operator `=` to assign it a different value
+  use the assignment operator `=` to assign it a different value.
 - And since the reference is passed by value, this new value that it is assigned
   inside of `addNumbers()` does not have any impact on the original value of
-  `myObject` inside of `main()`
+  `myObject` inside of `main()`.
 - So now we have two references, as before, but they now point to two different
   objects in memory, which is why changes that are made through one reference
   are not reflected through the other reference anymore.
@@ -114,6 +114,6 @@ of `references`:
 
 1. All primitive types are passed by value, meaning that changes to a variable
    of a primitive type inside a method never have an impact on that variable
-   outside that method
+   outside that method.
 2. All immutable types are also passed by value, with the same implication as
-   above
+   above.
