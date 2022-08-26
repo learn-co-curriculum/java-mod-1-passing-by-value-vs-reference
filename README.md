@@ -7,113 +7,172 @@
 ## Introduction
 
 When passing parameters to methods, programming languages either pass parameters
-by `value` or by `reference`.
+by value or by reference. But what does this mean?
 
-First let's review what a `reference` and a `value` are in this context:
+Consider this scenario: Suzie and Dustin are students. Dustin wants to borrow
+Suzie's notes to study for an upcoming test. Since Suzie would do anything to
+help Dustin, she considers two options:
 
-![object-reference.png](https://curriculum-content.s3.amazonaws.com/java-mod-1/passing-by-value-vs-reference/module-1-object-reference.png)
+- Option 1: She gives Dustin her original notes.
+- Option 2: She gives Dustin a photocopy of her notes.
 
-A illustrated above, a `reference` is what we can use in order to access an
-object's values in memory. With that in mind, let's consider these definitions:
+If Suzie chooses option 1, then she provides her original notes to Dustin.
+Dustin could then potentially alter her notes. If he does, then when he returns
+those notes to Suzie, her notes have been changed.
 
-- Passing a parameter by `reference` means that the receiving method is getting
-  the same object as the calling method passed in
-- Passing a parameter by `value` means that the receiving method is getting a
-  copy of the object that the calling method passed in
+If Suzie chooses option 2, then she keeps her original notes and provides
+Dustin a copy of her notes. If Dustin makes modifications to the copy and
+returns that to Suzie, her original notes remain unchanged.
 
-In reality, and in Java, it's not quite that simple. Let's consider the
-following two classes as an example:
+This scenario is actually an analogy to show the differences between pass by
+reference versus pass by value. Option 1 would represent pass by reference and
+option 2 would represent pass by value.
+
+**Pass-by-reference** (also known as call-by-reference) is when we pass the
+same object as a parameter to a receiving method. When a parameter is passed by
+reference, the receiving method can then access the parameter's value directly
+and make modifications to it. Just like with option 1, Dustin would then have
+direct access to the original notes and can make changes to them.
+
+**Pass-by-value** (also known as call-by-value) is when we pass a copy of the
+object as a parameter to the receiving method. When a parameter is passed by
+value, a _copy_ of the parameter's value is actually passed to the receiving
+method. The receiving method exclusively works with only a copy and therefore
+the changes made to the argument will not affect the original variable's value.
+Relating this back to our scenario, this would be the same situation as option
+2 where Suzie provides only a copy of her notes instead of handing over her
+original notes.
+
+## Java is Pass-By-Value
+
+In Java, all arguments are pass-by-value. Java does not allow parameters to be
+passed by reference, meaning objects themselves cannot be passed around to
+different methods.
+
+Let's look at a very simple example to show how pass-by-value works:
 
 ```java
-public class ContainerClass {
-    public int number;
-    public String text;
-}
-```
-
-```java
-public class SampleClass {
+public class Example {
     public static void main(String[] args) {
-        ContainerClass myObject = new ContainerClass();
-        myObject.number = 0;
-        addNumbers(myObject, 12, 7);
-        System.out.println("sum = " + myObject.number);
+        int number = 10;
+        System.out.println("number before method call is " + number);
+        change(number);
+        System.out.println("number after method call is " + number);
     }
 
-    public static void addNumbers(ContainerClass container, int firstNumber, int secondNumber) {
-        container.number = firstNumber + secondNumber;
+    public static void change(int numberCopy) {
+        numberCopy = numberCopy + 2;
+        System.out.println("numberCopy in the method call is " + numberCopy);
     }
 }
 ```
 
-In Java, object references are passed by value. This means that the
-`addNumbers()` method in the example above is getting its own copy of the
-container object reference, and that object reference is pointing to the same
-object as the calling method, as illustrated here:
+- When the code is first executed, we will enter the `main()` method and
+  initialize `number` to the value of 10.
+- We will then output the value of `number` before calling the `change()`
+  method.
+- In the `change()` method, we are passing it `number`. But remember - Java is
+  pass-by-value only. So this means that a copy of `number` is passed to the
+  method `change()`.
+- The code now enters in the `change()` method and receives a copy of `number`.
+  The receiving method chooses to call the copy of `number` `numberCopy`. Notice
+  that the parameter name does not need to be the same name as the variable we
+  are passing it.
+- At this point in time, `numberCopy` has the same value as `number`, which is
+  still 10.
+- We will reassign `numberCopy` to the expression `numberCopy + 2`. This
+  expression will return the value of 12.
+- We will print that the `numberCopy` value is now 12 and exit the method
+  `change()` since there are no more statements left to execute.
+- The code has now returned to the `main()` method and prints out the value
+  of `number` - which is still 10 since the method `change()` was only making
+  adjustments to the copy of `number` that we sent it.
 
-![two-references-same-object.png](https://curriculum-content.s3.amazonaws.com/java-mod-1/passing-by-value-vs-reference/module-1-two-references-same-object.png)
-
-This is a bit convoluted, so let's break it down:
-
-- The `main()` method create an object of type `ContainerClass` and calls it
-  `myObject`.
-- `myObject` is a reference to a place in the computer's memory where the data
-  for that object exists. Any time we want to recall that object, we can use
-  that reference and we can use `dot notation` to access any of its data.
-- The `addNumbers()` method receives a copy of the `myObject` reference and
-  chooses to call it `container` - we could have called that reference anything
-  we wanted, including `myObject` and it would a) compile and b) not impact of
-  any of the behavior we are describing here.
-- The `container` reference is a copy of the `myObject` reference. They both
-  start with same value, which is a reference to the place in memory where the
-  data for `myObject` lives.
-- When I use the `dot notation` with the `myObject` reference in the `main()`
-  method, I'm accessing the same data as when I use the `dot notation` with the
-  `container` reference in the `addNumbers()` method.
-- This is why running the code above will display that the value of
-  `myObject.number` in the `main()` method is `19`, even though that value was
-  changed in the `addNumbers()` method through the `container` reference. In
-  other words, `myObject.number` in `main()` and `container.number` in
-  `addNumbers()` are the same thing.
-
-So far, so good: objects are references, and references are passed by value, so
-when a change is made _inside_ of a reference by the receiving method, the
-calling method will see that change.
-
-Now consider the following modified code for the `addNumbers()` method:
-
-```java
-    public static void addNumbers(ContainerClass container, int firstNumber, int secondNumber) {
-        container = new ContainerClass(); // this is the line we added
-        container.number = firstNumber + secondNumber;
-    }
+```plainttext
+number before method call is 10
+numberCopy in the method call is 12
+number after method call is 10
 ```
 
-What do you think the new output for the program is with this new version of the
-`addNumbers()` method? Now go ahead and run it and observe it for yourself.
+## References Pass-By-Value
 
-It now outputs `0` as a the result of the sum, and here is why:
+Cool - we now understand how pass-by-value works! But we have only seen how it
+works with a primitive type, like `int`. What if we want to pass a reference
+type? Can we still do that if Java only allows us to pass-by-value?
 
-- `addNumbers()` receives a copy of the `myObject` reference, as it did in the
-  original version.
-- But now the first thing it does is take that reference, called `container` and
-  use the assignment operator `=` to assign it a different value.
-- And since the reference is passed by value, this new value that it is assigned
-  inside of `addNumbers()` does not have any impact on the original value of
-  `myObject` inside of `main()`.
-- So now we have two references, as before, but they now point to two different
-  objects in memory, which is why changes that are made through one reference
-  are not reflected through the other reference anymore.
+The answer is yes! But Java will still treat it as pass-by-value. Let's look at
+an example and how this might work in memory:
 
-Here is an illustration of what has happened with this new code:
+```java
+public class Example {
+  private int number;
 
-![two-references-two-objects.png](https://curriculum-content.s3.amazonaws.com/java-mod-1/passing-by-value-vs-reference/module-1-two-references-two-objects.png)
+  public Example(int number) {
+    this.number = number;
+  }
 
-There are two exceptions to the statement that Java passes parameters by `value`
-of `references`:
+  public int getNumber() {
+    return number;
+  }
 
-1. All primitive types are passed by value, meaning that changes to a variable
-   of a primitive type inside a method never have an impact on that variable
-   outside that method.
-2. All immutable types are also passed by value, with the same implication as
-   above.
+  public void setNumber(int number) {
+    this.number = number;
+  }
+  
+  public static void main(String[] args) {
+      Example mainExample = new Example(10);
+      System.out.println("number before method call is " + mainExample.getNumber());
+      change(mainExample);
+      System.out.println("number after method call is " + mainExample.getNumber());
+  }
+
+  public static void change(Example exampleCopy) {
+      exampleCopy.setNumber(exampleCopy.getNumber() + 2);
+      System.out.println("number in the method call is " + exampleCopy.getNumber());
+  }
+}
+```
+
+In the code above, notice how we made some changes from our previous example.
+We built up the `Example` class to contain a private instance variable `number`
+with a constructor, getter, and a setter. Now let's see what happens when we
+pass the object of type `Example` to the `change()` method:
+
+- When the code is first executed, we will enter the `main()` method and
+  create an object called `mainExample` of type `Example`. In doing so, we
+  set the `number` to 10.
+- We will then output the value of `number` before calling the `change()`
+  method, just as we did before.
+- In the `change()` method, we are passing it `mainExample`. Since Java is
+  pass-by-value only, we will pass it a copy of `mainExample`. Well remember
+  that `mainExample` is a reference type. This means, in memory, it points to
+  an object in the heap. So when we copy the reference, `mainExample`, we are
+  copying the pointer too. So our copy of the reference will actually point
+  to the same `Example` object in the heap!
+
+![Pass reference by value](https://curriculum-content.s3.amazonaws.com/java-mod-1/passing-by-value-vs-reference/References-Same-Object.png)
+
+- The code now enters in the `change()` method and receives a copy of
+  `mainExample`. The receiving method chooses to call the copy of `mainExample`
+  `exampleCopy`.
+- Since the `exampleCopy` reference points to the same object in memory as the
+  original `mainCopy`, the value of `number` is still 10.
+- We will set `number` to the expression `exampleCopy.getNumber() + 2`. This
+  expression will return the value of 12.
+
+![Change Value](https://curriculum-content.s3.amazonaws.com/java-mod-1/passing-by-value-vs-reference/References-Same-Object-Changed.png)
+
+- We will print that the `number` value is now 12 and exit the method
+  `change()` since there are no more statements left to execute.
+- The code has now returned to the `main()` method and prints out the value
+  of `number` - which is now 12 since the copy, `exampleCopy`, was pointing to
+  the same object as `mainExample`.
+
+```plainttext
+number before method call is 10
+number in the method call is 12
+number after method call is 12
+```
+
+In summary, when we copy a reference that is passed to a method, we are copying
+the pointer to the object as well.
